@@ -15,7 +15,7 @@ class LidarData:
         self.Angle_i = Angle_i
         self.Distance_i = Distance_i
 
-        self.Position = polar2cartesian(Angle_i, Distance_i)
+        # self.Position = polar2cartesian(Angle_i, Distance_i)
 
 
 # # https://stackoverflow.com/questions/20924085/python-conversion-between-coordinates
