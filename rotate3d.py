@@ -18,11 +18,7 @@ import numpy as np
 from scipy.spatial.transform import Rotation
 
 
-def rotate3d(points2d, rotation_axis, rotation_degrees):
-    # append Z dimension to get 3D points
-    zero_column = np.zeros((4, 1), dtype=float)
-    points3d = np.append(points2d, zero_column, axis=1)
-
+def rotate3d(points3d, rotation_axis, rotation_degrees):
     # define 3D rotation
     rotation_radians = np.radians(rotation_degrees)
     rotation_vector = rotation_radians * rotation_axis
@@ -45,5 +41,10 @@ points2d = [[-20.0, 16.],
 rotation_axis = np.array([0, 1, 0])
 rotation_degrees = 10
 
-points3d = rotate3d(points2d, rotation_axis, rotation_degrees)
+# append Z dimension to get 3D points
+zero_column = np.zeros((4, 1), dtype=float)
+points3d = np.append(points2d, zero_column, axis=1)
+
+# rotate
+points3d = rotate3d(points3d, rotation_axis, rotation_degrees)
 print(points3d)
