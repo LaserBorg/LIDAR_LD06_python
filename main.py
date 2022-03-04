@@ -1,9 +1,7 @@
 import serial
-# import binascii
-from CalcLidarData import CalcLidarData
 import matplotlib.pyplot as plt
 import math
-
+from CalcLidarData import CalcLidarData
 
 ###############
 # VISUALISATION

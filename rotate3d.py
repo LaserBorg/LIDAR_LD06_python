@@ -9,13 +9,37 @@ Let A = I x a, the cross product of a with an identity matrix I.
 Then exp(theta,A) is the rotation matrix.
 Finally, dotting the rotation matrix with the vector will rotate the vector.
 
-reference:
+
+references:
+
+rotation
 https://www.kite.com/python/answers/how-to-rotate-a-3d-vector-about-an-axis-in-python
 https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.transform.Rotation.html
+
+matplotlib 3D
+https://stackoverflow.com/questions/62433465/how-to-plot-3d-point-clouds-from-an-npy-file
+https://stackoverflow.com/questions/8130823/set-matplotlib-3d-plot-aspect-ratio
+
 """
 
 import numpy as np
 from scipy.spatial.transform import Rotation
+import matplotlib.pyplot as plt
+
+
+def plot_3D(pointcloud):
+    xs = pointcloud[:, 0]
+    ys = pointcloud[:, 1]
+    zs = pointcloud[:, 2]
+    fig = plt.figure(figsize=(10, 6))
+    ax = fig.add_subplot(projection='3d')
+    ax.set_box_aspect((np.ptp(xs), np.ptp(ys), np.ptp(zs)))
+    img = ax.scatter(xs, ys, zs)  # , c=t_low, cmap=plt.hot())
+    fig.colorbar(img)
+    ax.set_xlabel('X')
+    ax.set_ylabel('Y')
+    ax.set_zlabel('Z')
+    plt.show()
 
 
 def rotate3d(points3d, rotation_axis, rotation_degrees):
@@ -25,26 +49,29 @@ def rotate3d(points3d, rotation_axis, rotation_degrees):
     rotation = Rotation.from_rotvec(rotation_vector)
 
     # apply rotation to each point
+    result_points = points3d.copy()
     for i, point in enumerate(points3d):
-        points3d[i] = rotation.apply(point)
+        result_points[i] = rotation.apply(point)
 
-    return points3d
+    return result_points
 
 
-# image is Y-up
 points2d = [[-20.0, 16.],
             [-19.5, 17.],
             [-19.0, 18.],
             [20.0, -19.]]
 
-# rotating about Y-axis
-rotation_axis = np.array([0, 1, 0])
-rotation_degrees = 10
+# 3D rotation about up-axis (Z)
+rotation_axis = np.array([0, 0, 1])
+angular_resolution = 1  # in degrees
 
-# append Z dimension to get 3D points
-zero_column = np.zeros((4, 1), dtype=float)
-points3d = np.append(points2d, zero_column, axis=1)
+# insert 3.dimension before row 1 so 2D-Y becomes 3D-Z (image now vertical)
+points3d = np.insert(points2d, 1, values=0, axis=1)
 
 # rotate
-points3d = rotate3d(points3d, rotation_axis, rotation_degrees)
-print(points3d)
+pointcloud = np.zeros((1, 3))
+for angle in range(0, 360, angular_resolution):
+    point = rotate3d(points3d, rotation_axis, angle)
+    pointcloud = np.append(pointcloud, point, axis=0)
+
+plot_3D(pointcloud)
