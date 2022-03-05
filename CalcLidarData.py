@@ -1,10 +1,9 @@
-# import binascii
 import math
 import numpy as np
 
 # creates object for return-values of *CalcLidarData* function
 class LidarData:
-    def __init__(self, FSA, LSA, CS, Speed, TimeStamp, Confidence_i, Angle_i, Distance_i):
+    def __init__(self, FSA, LSA, CS, Speed, TimeStamp, Confidence_i, Angle_i, Distance_i, offset_angle=0):
         self.FSA = FSA
         self.LSA = LSA
         self.CS = CS
@@ -15,12 +14,16 @@ class LidarData:
         self.Angle_i = Angle_i
         self.Distance_i = Distance_i
 
-        # self.Position = polar2cartesian(Angle_i, Distance_i)
+        x, y = polar2cartesian(self.Angle_i, self.Distance_i, offset_angle=offset_angle)
+        self.x = x
+        self.y = y
 
 
 # # https://stackoverflow.com/questions/20924085/python-conversion-between-coordinates
-def polar2cartesian(angle, distance):
-    x = distance * np.cos(angle)
+def polar2cartesian(angle, distance, offset_angle=0):
+    angle = list(np.array(angle) + offset_angle)
+
+    x = distance * -np.cos(angle)
     y = distance * np.sin(angle)
     return x, y
 # def cartesian2polar(x, y):
@@ -29,14 +32,14 @@ def polar2cartesian(angle, distance):
 #     return angle, distance
 
 
-def CalcLidarData(string):
+def CalcLidarData(string, offset_angle=0):
     string = string.replace(' ', '')
 
     Speed = int(string[2:4] + string[0:2], 16) / 100
     FSA = float(int(string[6:8] + string[4:6], 16)) / 100         # Start Angle
     LSA = float(int(string[-8:-6] + string[-10:-8], 16)) / 100    # End Angle
     TimeStamp = int(string[-4:-2] + string[-6:-4], 16)
-    CS = int(string[-2:], 16)                                  # Check Code
+    CS = int(string[-2:], 16)                                     # Check Code
 
     Confidence_i = list()
     Angle_i = list()
@@ -55,5 +58,5 @@ def CalcLidarData(string):
         Angle_i.append(circle(angleStep * counter + FSA) * math.pi / 180.0)
         counter += 1
 
-    lidarData = LidarData(FSA, LSA, CS, Speed, TimeStamp, Confidence_i, Angle_i, Distance_i)
+    lidarData = LidarData(FSA, LSA, CS, Speed, TimeStamp, Confidence_i, Angle_i, Distance_i, offset_angle=offset_angle)
     return lidarData
