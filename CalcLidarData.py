@@ -1,6 +1,7 @@
 import math
 import numpy as np
 
+
 # creates object for return-values of *CalcLidarData* function
 class LidarData:
     def __init__(self, FSA, LSA, CS, Speed, TimeStamp, Confidence_i, Angle_i, Distance_i, offset_angle=0):
@@ -19,10 +20,9 @@ class LidarData:
         self.y = y
 
 
-# # https://stackoverflow.com/questions/20924085/python-conversion-between-coordinates
+# https://stackoverflow.com/questions/20924085/python-conversion-between-coordinates
 def polar2cartesian(angle, distance, offset_angle=0):
     angle = list(np.array(angle) + offset_angle)
-
     x = distance * -np.cos(angle)
     y = distance * np.sin(angle)
     return x, y

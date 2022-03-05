@@ -1,12 +1,25 @@
+"""
+░░      ░░ ░░░░░░   ░░░░░  ░░░░░░      ░░      ░░░░░░   ░░░░░░   ░░░░░░
+▒▒      ▒▒ ▒▒   ▒▒ ▒▒   ▒▒ ▒▒   ▒▒     ▒▒      ▒▒   ▒▒ ▒▒  ▒▒▒▒ ▒▒
+▒▒      ▒▒ ▒▒   ▒▒ ▒▒▒▒▒▒▒ ▒▒▒▒▒▒      ▒▒      ▒▒   ▒▒ ▒▒ ▒▒ ▒▒ ▒▒▒▒▒▒▒
+▓▓      ▓▓ ▓▓   ▓▓ ▓▓   ▓▓ ▓▓   ▓▓     ▓▓      ▓▓   ▓▓ ▓▓▓▓  ▓▓ ▓▓    ▓▓
+███████ ██ ██████  ██   ██ ██   ██     ███████ ██████   ██████   ██████
+"""
+
 import serial
 import matplotlib.pyplot as plt
 import math
+import numpy as np
 import platform
+import time
+
 from CalcLidarData import CalcLidarData
 
-###############
-# # VISUALISATION
 
+"""
+ █ █ █ ▄▀▀ █ █ ▄▀▄ █   █ ▄▀▀ ▄▀▄ ▀█▀ █ ▄▀▄ █▄ █
+ ▀▄▀ █ ▄██ ▀▄█ █▀█ █▄▄ █ ▄██ █▀█  █  █ ▀▄▀ █ ▀█                                                  
+"""
 radial = False
 offset_angle = math.pi / 2
 
@@ -17,27 +30,27 @@ offset_angle = math.pi / 2
 # plt.rcParams['ytick.color'] = COLOR
 
 fig = plt.figure(figsize=(8, 8))
-range =20
+plotrange =20
 
 if radial is True:
     ax = fig.add_subplot(111, projection='polar')
-    ax.set_ylim([0, range])
+    ax.set_ylim([0, plotrange])
 else:
     ax = fig.add_subplot(111)
-    ax.set_ylim([-range, range])
-    ax.set_xlim([-range, range])
+    ax.set_ylim([-plotrange, plotrange])
+    ax.set_xlim([-plotrange, plotrange])
 
 ax.set_title('LiDAR LD06', fontsize=18)
-
-
-# ax.set_facecolor('white')
-# ax.xaxis.grid(True, color='lightgray', linestyle='dashed')
-# ax.yaxis.grid(True, color='lightgray', linestyle='dashed')
-
-# # press 'q' to quit
-# plt.connect('key_press_event', lambda event: exit(1) if event.key == 'q' else None)
+ax.set_facecolor('lightgray')
+ax.xaxis.grid(True, color='darkgray', linestyle='dashed')
+ax.yaxis.grid(True, color='darkgray', linestyle='dashed')
 ###############
 
+
+"""
+ █▄ ▄█ ▄▀▄ █ █▄ █   █   ▄▀▄ ▄▀▄ █▀▄
+ █ ▀ █ █▀█ █ █ ▀█   █▄▄ ▀▄▀ ▀▄▀ █▀ 
+"""
 # select port by OS
 ports = {'Windows': 'COM6',
          'Linux': '/dev/ttyUSB0'}  # '/dev/tty.usbserial-0001'
@@ -63,19 +76,17 @@ while True:
             line.remove()
 
         if radial is True:
-            line = ax.scatter(angles, distances, c="blue", s=2)
-
-            # matplotlib polar default is CCW, so CW is -1
-            ax.set_theta_direction(-1)
-
-            # offset rotation so marking on LD06 is 0°
-            ax.set_theta_offset(offset_angle)
-
+            line = ax.scatter(angles, distances, c="blue", s=1)
+            ax.set_theta_direction(-1)         # matplotlib polar default is CCW, so CW is -1
+            ax.set_theta_offset(offset_angle)  # offset rotation so marking on LD06 is 0°
         else:
-            line = ax.scatter(x_list, y_list, c="blue", s=2)
+            line = ax.scatter(x_list, y_list, c="blue", s=1)
 
         # update plot
         plt.pause(0.01)
+
+        # save csv
+        np.savetxt(f"csv/{time.time()}.csv", np.column_stack((x_list, y_list)), delimiter=",")
 
         if radial is True:
             angles.clear()
