@@ -9,10 +9,7 @@
 import serial
 import matplotlib.pyplot as plt
 import math
-
 import numpy as np
-from  numpy.lib.recfunctions import append_fields
-
 import platform
 import time
 import os
@@ -25,6 +22,7 @@ def save_thread(x_list, y_list, color):
     data = np.column_stack((x_list, y_list, color))
 
     # TODO: preserve dtype=np.int32 for color column
+    # from  numpy.lib.recfunctions import append_fields
     # data = append_fields(data, 'color', color, usemask=False, dtypes=[np.int64])
 
     np.savetxt(f"{output_path}/{time.time()}.csv", data, delimiter=";")
