@@ -82,7 +82,7 @@ pointcloud = np.zeros((1, 3))
 angle = 0
 
 for filepath in filepaths:
-    points2d = np.loadtxt(filepath, delimiter=",")
+    points2d = np.loadtxt(filepath, delimiter=";")
 
     # insert 3.dimension before row 1 so 2D-Y becomes 3D-Z (image now vertical)
     points3d = np.insert(points2d, 1, values=0, axis=1)
