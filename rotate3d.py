@@ -55,42 +55,50 @@ def rotate3d(points3d, rotation_axis, rotation_degrees):
     rotation_vector = rotation_radians * rotation_axis
     rotation = Rotation.from_rotvec(rotation_vector)
 
-    # apply rotation to each point
     result_points = points3d.copy()
+
+    if points3d.shape[1] == 4:
+        # remove intensity column
+        points3d = np.delete(points3d, -1, axis=1)
+    
+    # apply rotation to each point
     for i, point in enumerate(points3d):
-        result_points[i] = rotation.apply(point)
+        result_points[i][0:3] = rotation.apply(point)
 
     return result_points
 
 
-# 3D rotation about up-axis (Z)
-rotation_axis = np.array([0, 0, 1])
+def listfiles(dir, extension=None):
+    # index all csv files
+    filepaths = list()
+    for root, dirs, files in os.walk(dir, topdown=False):
+        for file in files:
+            if extension is None or os.path.splitext(file)[1] == extension:
+                filepath = os.path.join(root, file)
+                filepaths.append(filepath)
+    return filepaths
+
+
+rotation_axis = np.array([0, 0, 1])  # 3D rotation about up-axis (Z)
 angular_resolution = 1  # in degrees
 
-
-# index all csv files
-filepaths = list()
-for root, dirs, files in os.walk("csv", topdown=False):
-    for file in files:
-        if os.path.splitext(file)[1] == ".csv":
-            filepath = os.path.join(root, file)
-            filepaths.append(filepath)
-
-
-# init result object
-pointcloud = np.zeros((1, 3))
+# init result object with (X,y,Z, intensity)
+pointcloud = np.zeros((1, 4))
 angle = 0
+
+filepaths = listfiles("csv", extension=".csv")
 
 for filepath in filepaths:
     points2d = np.loadtxt(filepath, delimiter=";")
 
-    # insert 3.dimension before row 1 so 2D-Y becomes 3D-Z (image now vertical)
+    # insert 3D Y=0 after column 0 so 2D Y becomes 3D Z (Z-up: image is now vertical)
     points3d = np.insert(points2d, 1, values=0, axis=1)
 
-    #for angle in range(0, 360, angular_resolution):
-    rotated_points3d = rotate3d(points3d, rotation_axis, angle)
-    pointcloud = np.append(pointcloud, rotated_points3d, axis=0)
+    # for angle in range(0, 360, angular_resolution):
+    points3d = rotate3d(points3d, rotation_axis, angle)
+    pointcloud = np.append(pointcloud, points3d, axis=0)
 
     angle += angular_resolution
 
+print("pointcloud:", pointcloud.shape)
 plot_3D(pointcloud)
