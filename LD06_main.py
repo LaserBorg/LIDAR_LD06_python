@@ -68,11 +68,10 @@ class LD06_data:
         Confidence_i = list()
         Angle_i = list()
         Distance_i = list()
-        # count = 0  # unused variable?
-        if LSA - FSA > 0:
-            angleStep = float(LSA - FSA) / 12
-        else:
-            angleStep = float((LSA + 360) - FSA) / 12
+
+
+        # OPTION 1
+        angleStep = float(LSA - FSA) / 12 if LSA - FSA > 0 else float((LSA + 360) - FSA) / 12
 
         counter = 0
         circle = lambda deg: deg - 360 if deg >= 360 else deg
@@ -81,9 +80,26 @@ class LD06_data:
             Confidence_i.append(int(string[8 + i + 4:8 + i + 6], 16))
             Angle_i.append(circle(angleStep * counter + FSA) * math.pi / 180.0)
             counter += 1
+
+
+        # # OPTION 2
+        # TODO: https://github.com/henjin0/Lidar_LD06_for_Arduino
         
+        # # Calculate the total angle difference
+        # total_angle_diff = LSA - FSA if LSA > FSA else (LSA + 360) - FSA
+
+        # for i in range(0, 6 * 12, 6):
+        #     # Calculate distance and confidence
+        #     Distance_i.append(int(string[8 + i + 2:8 + i + 4] + string[8 + i:8 + i + 2], 16) / 100)
+        #     Confidence_i.append(int(string[8 + i + 4:8 + i + 6], 16))
+
+        #     # Calculate the exact angle for this data point using its timestamp
+        #     exact_angle = FSA + (total_angle_diff * (i / 72))  # 72 = 6 bytes per data point * 12 data points
+        #     # Convert the angle to radians and adjust it if it's >= 360
+        #     Angle_i.append((exact_angle if exact_angle < 360 else exact_angle - 360) * math.pi / 180.0)
+
         return LD06_data(FSA, LSA, CS, Speed, TimeStamp, Confidence_i, Angle_i, Distance_i, offset=offset)
-    
+
 
 def save_thread(x_list, y_list, color):
     # TODO: preserve dtype=np.int32 for color column
