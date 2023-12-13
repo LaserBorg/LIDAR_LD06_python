@@ -1,27 +1,30 @@
 # LIDAR_LD06_python
-This code can use  Lidar's LD06 (LDS06) provided by LDROBOT from python. and It displays the acquired point cloud in real time in matplotlib.
+Python code for LDROBOT LD06 Lidar
 
 
+## Serial Protocol
+baudrate 230400, data bits 8, no parity, 1 stopbit  
+sampling frequency 4500, scan frequency 5-13 Hz, distance 2cm - 12 meter, ambient light 30 kLux
 
-pip install pyserial
+total package size: 48 Byte, big endian.
+- starting character：Length 1 Byte, fixed value 0x54, means the beginning of data packet;
+- Data Length: Length 1 Byte, the first three digits reserved, the last five digits represent the number of measured points in a packet, currently fixed value 12;
+- speed：Length 2 Byte, in degrees per second;
+- Start angle: Length: 2 Byte; unit: 0.01 degree;
+- Data: Length 36 Byte; containing 12 data points with 3 Byte each: 2 Byte distance (unit: 1 mm), 1 Byte luminance. For white objects within 6m, the typical luminance is around 200.
+- End Angle: Length: 2 Byte; unit: 0.01 degree；
+- Timestamp: Length 2 Bytes in ms, recount if reaching to MAX 30000；
+- CRC check: Length 1 Byte
 
-fix tty rights:
-https://github.com/esp8266/source-code-examples/issues/26
-sudo usermod -a -G dialout your-username
-sudo usermod -a -G tty your-username
+The Angle value of each data point is obtained by linear interpolation of the starting angle and the ending angle.  
+The calculation method of the angle is as following:
+> step = (end_angle – start_angle)/(len – 1)  
+> angle = start_angle + step*i  
+
+len is the length of the packet, and the i value range is [0, len].
 
 
-
-
-# How to use
-1. Clone this repository and change `Serial(port='/dev/tty.usbserial-0001'...)` in main.py to your own port (LDRobot LD06 on Windows: 'COM6').
-2. Run `pip install -r requirements.txt` in venv environment.
-3. Run `python main.py`.
-4. Press the E key to exit.
-
-# About LD06(LDS06)
-- Sales page https://www.inno-maker.com/product/lidar-ld06/
-- Datasheet http://wiki.inno-maker.com/display/HOMEPAGE/LD06
-
-# LICENSE
-Please see [LICENSE](https://github.com/henjin0/LIDAR_LD06_python_loder/blob/main/LICENSE).
+## About LD06(LDS06)
+- [Sales page](https://www.inno-maker.com/product/lidar-ld06/)
+- [mechanical Datasheet](https://www.inno-maker.com/wp-content/uploads/2020/11/LDROBOT_LD06_Datasheet.pdf)
+- [Protocol Description](https://storage.googleapis.com/mauser-public-images/prod_description_document/2021/315/8fcea7f5d479f4f4b71316d80b77ff45_096-6212_a.pdf)
